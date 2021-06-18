@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Mike West"]
   spec.email         = ["westmd23@gmail.com"]
 
-  spec.summary       = %q{Homework Assignment for RC}
+  spec.summary       = %q{File Manipulation and Analysis}
   spec.homepage      = "https://github.com/westmd23/sensor"
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")

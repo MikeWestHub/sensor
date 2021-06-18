@@ -1,15 +1,14 @@
 #!/usr/bin/env ruby
 
 # Defines the command line interface for the sensor framework
-#
-#  
+
 require_relative 'lib/sensor'
 require 'optparse'
 
 include Sensor
 
 unless ARGV[0]
-  puts "Must provide a file name to act on."
+  puts "Must provide a filename to act on."
   puts ""
   puts "Example Usage: ruby sensor foobar.csv"
   exit 1
@@ -18,7 +17,7 @@ end
 if ARGV[0] =~ /\A-/ && ARGV[0] != '--help'
   puts "Must provide a filename as the first argument"
   puts ""
-  puts "Example Usage: ruby sensor foobar.csv -m w"
+  puts "Example Usage: ruby sensor foobar.csv -w -c 'this,is,fine'"
   exit 1
 end
 
@@ -27,12 +26,16 @@ options = { file: ARGV[0] }
 OptionParser.new do |opts|
   opts.banner = "The following flags are available:"
 
-  opts.on("-r", "--read", "Read from a given file") do |r|
-    options[:read] = r
-  end
-
   opts.on("-w", "--write", "Create and write to a file with the given filename") do |w|
     options[:write] = w
+  end
+
+  opts.on("-u", "--update", "Update a file with the given filename") do |u|
+    options[:update] = u
+  end
+
+  opts.on("-d", "--delete", "Delete a file with the given filename") do |d|
+    options[:delete] = d
   end
 
   opts.on("-x", "--execute", "Execute a given file") do |e|
@@ -40,9 +43,9 @@ OptionParser.new do |opts|
   end
 
   opts.on("-c", "--content CONTENT", "Accepts a string of file with contents for writing.
-                                     Must be provided when passing the --write flag") do |c|
+                                     Must be provided when passing the --write or --update flag") do |c|
     options[:content] = c
   end
 end.parse!
 
-Sensor::Ingest.from_cli(options)
+Sensor::Ingestor.read_from_cli(options)
