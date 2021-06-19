@@ -1,7 +1,7 @@
 require "spec_helper"
 
 RSpec.describe Sensor::Logger do
-  let(:log_line) { { activity: 'test'} }
+  let(:log_line) { { activity: "test"} }
   let(:test_file) { File.expand_path("#{File.dirname(__FILE__)}/../../spec/sensor-test.log") }
   let(:json) { JSON.parse(File.open(test_file, &:readline)) }
 
@@ -13,7 +13,7 @@ RSpec.describe Sensor::Logger do
     File.delete(test_file)
   end
 
-  describe '.activity' do
+  describe ".activity" do
     it "adds a timestamp to the log line" do
       described_class.activity(log_line)
       expect(json.keys).to include("timestamp")
@@ -25,12 +25,12 @@ RSpec.describe Sensor::Logger do
       expect(File).to have_received(:new).with(test_file, "w")
     end
 
-    context 'when a file does exist' do
+    context "when a file does exist" do
       before do
         File.new(test_file, "w")
       end
 
-      it 'opens the existing file' do
+      it "opens the existing file" do
         allow(File).to receive(:open).and_call_original
         described_class.activity(log_line)
         expect(File).to have_received(:open).with(test_file, "a")
@@ -38,10 +38,10 @@ RSpec.describe Sensor::Logger do
     end
   end
 
-  describe '.error' do
-    let(:error) { StandardError.new(message: 'test error') }
+  describe ".error" do
+    let(:error) { StandardError.new(message: "test error") }
 
-    it 'logs the error' do
+    it "logs the error" do
       described_class.error(error)
       expect(json["type"]).to eql("error")
       expect(json["message"]).to eql(error.message)

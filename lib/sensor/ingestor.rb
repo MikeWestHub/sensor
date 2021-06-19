@@ -15,6 +15,7 @@ module Sensor
 
     def process_cli_input
       validate_input
+      process_input
     rescue ValidationError => e
       log_error(e)
       puts "Validation Error: #{e.message}"
@@ -24,6 +25,11 @@ module Sensor
 
     def validate_input
       Sensor::CommandLineValidator.new(input: input).validate
+    end
+
+    def process_input
+      filename = input.delete(:filename)
+      Sensor::ProcessSelector.new(filename: filename, options: input).run
     end
 
     def log_error(error)

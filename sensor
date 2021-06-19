@@ -21,7 +21,7 @@ if ARGV[0] =~ /\A-/ && ARGV[0] != '--help'
   exit 1
 end
 
-options = { file: ARGV[0] }
+options = { filename: ARGV[0] }
 
 OptionParser.new do |opts|
   opts.banner = "The following flags are available:"
@@ -42,7 +42,7 @@ OptionParser.new do |opts|
     options[:execute] = e
   end
 
-  opts.on("-c", "--content CONTENT", "Accepts a string of file with contents for writing.
+  opts.on("-c", "--content CONTENT", "Accepts a string with contents for writing.
                                      Must be provided when passing the --write or --update flag") do |c|
     options[:content] = c
   end
