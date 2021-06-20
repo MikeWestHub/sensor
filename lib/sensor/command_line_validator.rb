@@ -74,6 +74,7 @@ module Sensor
     def only_true_flag?
       opts = options.dup
       opts.delete(:content)
+      opts.delete(:forward)
 
       return false if opts.values.size > 1
       true

@@ -13,7 +13,7 @@ RSpec.describe Sensor::ProcessSelector do
         expect(selector).to have_received(:write_to_file)
       end
 
-      it 'logs the process' do
+      it "logs the process" do
         expect(Sensor::Logger).to receive(:activity)
         selector.run
       end
@@ -28,7 +28,7 @@ RSpec.describe Sensor::ProcessSelector do
         expect(selector).to have_received(:update_file)
       end 
 
-      it 'logs the process' do
+      it "logs the process" do
         expect(Sensor::Logger).to receive(:activity)
         selector.run
       end
@@ -43,7 +43,7 @@ RSpec.describe Sensor::ProcessSelector do
         expect(selector).to have_received(:delete_file)
       end 
 
-      it 'logs the process' do
+      it "logs the process" do
         expect(Sensor::Logger).to receive(:activity)
         selector.run
       end
@@ -53,17 +53,35 @@ RSpec.describe Sensor::ProcessSelector do
       let(:options) { {} }
 
       before do
-        allow(IO).to receive(:popen).and_return({})
+        allow(IO).to receive_message_chain(:popen, :each_line).and_return(true)
       end
-      
+
       it "selects the execute process" do
         allow(selector).to receive(:execute_file)
         selector.run
         expect(selector).to have_received(:execute_file)
       end 
 
-      it 'logs the process' do
+      it "logs the process" do
         expect(Sensor::Logger).to receive(:activity)
+        selector.run
+      end
+    end
+
+    context "when the forward flag is set" do
+      let(:options) { { update: true, content: "puts 'Hola Amigos'", forward: true } }
+
+      it "calls the HttpForwarder" do
+        expect(Sensor::HttpForwarder).to receive(:new)
+        selector.run
+      end
+    end
+
+    context "when the forward flag is not set" do
+      let(:options) { { update: true, content: "puts 'Hola Amigos'" } }
+
+      it "doesn't call the HttpForwarder" do
+        expect(Sensor::HttpForwarder).to_not receive(:new)
         selector.run
       end
     end

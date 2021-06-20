@@ -36,25 +36,40 @@ module Sensor
     def write_to_file
       f = File.new(filename, "w")
       f << "#{options[:content]}\n"
-      log_activity(f)
+
+      log_activity
+
       f.close
+
+      forward_activity
     end
 
     def update_file
       f = File.open(filename, "a")
       f << "#{options[:content]}\n"
-      log_activity(f)
+
+      log_activity
+
       f.close
+
+      forward_activity
     end
 
     def delete_file
       File.delete(filename)
       log_activity
+      forward_activity
     end
 
     def execute_file
-      output = IO.popen(filename)
-      log_activity(output)
+      output = ""
+
+      IO.popen(filename).each_line do |line|
+        output << "#{line}\n"
+      end
+
+      log_activity
+      forward_activity(output: output)
     end
 
     def find_action_from_flag
@@ -64,7 +79,20 @@ module Sensor
       "execute" # will attempt to execute a file if no flags are passed
     end
 
-    def log_activity(subprocess = nil)
+    def forward_activity(output: nil)
+      return unless options[:forward]
+
+      info = commandline.merge!(action: find_action_from_flag)
+      info.merge!(output: output) if output
+
+      Sensor::HttpForwarder.new(file_info: info).send_data
+    end
+
+    def commandline
+      { filename: filename }.merge!(options)
+    end
+
+    def log_activity
       hsh = {
         action: "#{find_action_from_flag}_file",
         username: `who -m | awk '{print $1}'`.strip,
@@ -73,7 +101,7 @@ module Sensor
         process_id: Process.pid,
         process_started_at: File::Stat.new(Process.argv0).birthtime,
         path_to_file: filename,
-        commandline: { filename: filename }.merge!(options)
+        commandline: commandline
       }
 
       Sensor::Logger.activity(hsh)

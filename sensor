@@ -42,9 +42,13 @@ OptionParser.new do |opts|
     options[:execute] = e
   end
 
-  opts.on("-c", "--content CONTENT", "Accepts a string with contents for writing.
+  opts.on("-c", "--content CONTENT", "Accepts a string with contents for writing
                                      Must be provided when passing the --write or --update flag") do |c|
     options[:content] = c
+  end
+
+  opts.on("-f", "--forward", "Forward Sensor information to an ADDRESS and PORT specified by they environment") do |f|
+    options[:forward] = f
   end
 end.parse!
 

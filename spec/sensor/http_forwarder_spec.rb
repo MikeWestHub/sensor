@@ -1,19 +1,22 @@
 require "spec_helper"
-require 'pry'
 
 RSpec.describe Sensor::HttpForwarder do
   let(:file_info) { { filename: "/bin/ls", action: "execute", output: "sensor" } }
   let(:forwarder) { described_class.new(file_info: file_info) }
 
   describe '.send_data' do
+    before do
+      allow(TCPSocket).to receive(:new).and_return(double('TCPSocket', write: true, close: true))
+      allow(forwarder).to receive(:log_activity).and_return(true)
+    end
+
     it 'creates a new socket connection' do
-      allow(TCPSocket).to receive(:new).and_call_original
+      expect(TCPSocket).to receive(:new).with(Sensor::HttpForwarder::ADDRESS, Sensor::HttpForwarder::PORT)
       forwarder.send_data
-      expect(TCPSocket).to have_received(:new).with(Sensor::HttpForwarder::ADDRESS, Sensor::HttpForwarder::PORT)
     end
 
     it 'logs the activity' do
-      expect(Sensor::Logger).to receive(:activity)
+      expect(forwarder).to receive(:log_activity)
       forwarder.send_data
     end
   end

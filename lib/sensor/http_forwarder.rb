@@ -1,7 +1,7 @@
 # Forwards Sensor activity on to a configurable
 # host and port
-require 'socket'
-require 'json'
+require "socket"
+require "json"
 
 module Sensor
   class HttpForwarder
@@ -34,7 +34,7 @@ module Sensor
         forwarded_at: Time.now.utc,
         sensor_info: {
           filename: file_info[:filename],
-          file_action: file_info[:action],
+          file_action: file_info.delete(:action),
           file_content: file_info[:content],
           executable_output: file_info.delete(:output),
           command_line: file_info
