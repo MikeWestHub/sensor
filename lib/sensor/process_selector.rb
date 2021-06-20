@@ -54,7 +54,7 @@ module Sensor
 
     def execute_file
       output = IO.popen(filename)
-      log_activiy(output)
+      log_activity(output)
     end
 
     def find_action_from_flag
@@ -64,20 +64,19 @@ module Sensor
       "execute" # will attempt to execute a file if no flags are passed
     end
 
-    def log_activity(process = nil)
-      Sensor::Logger.activity(info_for(process))
-    end
-
-    def info_for(subprocess)
-      return unless subprocess
-      stat = subprocess.stat
-
-      {
-        subprocess_user: stat.uid,
-        subprocess_id: stat.extend(Process).send(:pid),
-        subprocess_started_at: stat.birthtime,
-        subprocess_command: { filename: filename }.merge!(options)
+    def log_activity(subprocess = nil)
+      hsh = {
+        action: "#{find_action_from_flag}_file",
+        username: `who -m | awk '{print $1}'`.strip,
+        user_id: Process.uid,
+        process_name: Process.argv0,
+        process_id: Process.pid,
+        process_started_at: File::Stat.new(Process.argv0).birthtime,
+        path_to_file: filename,
+        commandline: { filename: filename }.merge!(options)
       }
+
+      Sensor::Logger.activity(hsh)
     end
   end
 end

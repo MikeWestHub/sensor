@@ -14,9 +14,8 @@ RSpec.describe Sensor::ProcessSelector do
       end
 
       it 'logs the process' do
-        allow(selector).to receive(:log_activity)
+        expect(Sensor::Logger).to receive(:activity)
         selector.run
-        expect(selector).to have_received(:log_activity)
       end
     end
 
@@ -30,9 +29,8 @@ RSpec.describe Sensor::ProcessSelector do
       end 
 
       it 'logs the process' do
-        allow(selector).to receive(:log_activity)
+        expect(Sensor::Logger).to receive(:activity)
         selector.run
-        expect(selector).to have_received(:log_activity)
       end
     end
 
@@ -46,9 +44,8 @@ RSpec.describe Sensor::ProcessSelector do
       end 
 
       it 'logs the process' do
-        allow(selector).to receive(:log_activity)
+        expect(Sensor::Logger).to receive(:activity)
         selector.run
-        expect(selector).to have_received(:log_activity)
       end
     end
 
@@ -66,9 +63,8 @@ RSpec.describe Sensor::ProcessSelector do
       end 
 
       it 'logs the process' do
-        allow(selector).to receive(:log_activity)
+        expect(Sensor::Logger).to receive(:activity)
         selector.run
-        expect(selector).to have_received(:log_activity)
       end
     end
   end

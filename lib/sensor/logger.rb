@@ -4,16 +4,7 @@ module Sensor
   class Logger
     LOG_FILE = File.expand_path("#{File.dirname(__FILE__)}/../../logs/sensor.log")
 
-    def self.activity(subprocess = {})
-      hsh = {
-        username: `who -m | awk '{print $1}'`,
-        user_id: File::Stat.new(Process.argv0).uid,
-        process_name: Process.argv0,
-        process_id: Process.pid,
-        process_started_at: File::Stat.new(Process.argv0).birthtime,
-        subprocess: subprocess
-      }
-
+    def self.activity(hsh)
       write_to_log(hsh)
     end
 
