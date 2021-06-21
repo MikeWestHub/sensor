@@ -47,7 +47,7 @@ OptionParser.new do |opts|
     options[:content] = c
   end
 
-  opts.on("-f", "--forward", "Forward Sensor information to an ADDRESS and PORT specified by they environment") do |f|
+  opts.on("-f", "--forward", "Forward Sensor information to an ADDRESS and PORT specified by the environment") do |f|
     options[:forward] = f
   end
 end.parse!
