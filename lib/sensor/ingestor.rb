@@ -14,6 +14,7 @@ module Sensor
     end
 
     def process_cli_input
+      log_activity
       validate_input
       process_input
     rescue ValidationError => e
@@ -28,8 +29,21 @@ module Sensor
     end
 
     def process_input
-      filename = input.delete(:filename)
-      Sensor::ProcessSelector.new(filename: filename, options: input).run
+      Sensor::ProcessSelector.new(input: input).run
+    end
+
+    def log_activity
+      hsh = {
+        action: :command_line_request,
+        process_started_at: File::Stat.new(Process.argv0).birthtime,
+        username: `who -m | awk '{print $1}'`.strip,
+        user_id: Process.uid,
+        process_name: Process.argv0,
+        process_id: Process.pid,
+        commandline: input
+      }
+
+      Sensor::Logger.activity(hsh)
     end
 
     def log_error(error)

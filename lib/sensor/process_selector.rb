@@ -1,13 +1,21 @@
 # Takes a filename and options and starts the appropriate
 # process based on those inputs
 
+require 'pry'
 module Sensor
   class ProcessSelector
-    attr_reader :filename, :options
+    attr_reader :input, :filename
 
-    def initialize(filename:, options:)
-      @filename = filename
-      @options = options
+    PROCESS_MAP = {
+      write: "write_to_file",
+      update: "update_file",
+      delete: "delete_file",
+      execute: "execute_file"
+    }.freeze
+
+    def initialize(input:)
+      @input = input
+      @filename = input[:filename]
     end
 
     def run
@@ -18,16 +26,12 @@ module Sensor
     private
 
     def start_process_for(action)
-      case action
-      when "write"
-        write_to_file
-      when "update"
-        update_file
-      when "delete"
-        delete_file
-      when "execute"
-        execute_file
-      end
+      fork {
+        send(PROCESS_MAP[action])
+        log_activity
+      }
+
+      forward_activity unless action == :execute
     rescue => e
       Sensor::Logger.error(e)
       puts "There was an issue with the #{action} action for #{filename}: #{e.message}"
@@ -35,30 +39,18 @@ module Sensor
 
     def write_to_file
       f = File.new(filename, "w")
-      f << "#{options[:content]}\n"
-
-      log_activity
-
+      f << "#{input[:content]}\n"
       f.close
-
-      forward_activity
     end
 
     def update_file
       f = File.open(filename, "a")
-      f << "#{options[:content]}\n"
-
-      log_activity
-
+      f << "#{input[:content]}\n"
       f.close
-
-      forward_activity
     end
 
     def delete_file
       File.delete(filename)
-      log_activity
-      forward_activity
     end
 
     def execute_file
@@ -68,40 +60,35 @@ module Sensor
         output << "#{line}\n"
       end
 
-      log_activity
       forward_activity(output: output)
     end
 
     def find_action_from_flag
-      return "write" if options[:write] == true
-      return "update" if options[:update] == true
-      return "delete" if options[:delete] == true
-      "execute" # will attempt to execute a file if no flags are passed
+      return :write if input[:write] == true
+      return :update if input[:update] == true
+      return :delete if input[:delete] == true
+      :execute # will attempt to execute a file if no flags are passed
     end
 
     def forward_activity(output: nil)
-      return unless options[:forward]
+      return unless input[:forward]
 
-      info = commandline.merge!(action: find_action_from_flag)
+      info = input.merge!(action: find_action_from_flag)
       info.merge!(output: output) if output
 
       Sensor::HttpForwarder.new(file_info: info).send_data
     end
 
-    def commandline
-      { filename: filename }.merge!(options)
-    end
-
     def log_activity
       hsh = {
-        action: "#{find_action_from_flag}_file",
+        action: "#{find_action_from_flag}_file".to_sym,
+        process_started_at: File::Stat.new(Process.argv0).birthtime,
         username: `who -m | awk '{print $1}'`.strip,
         user_id: Process.uid,
         process_name: Process.argv0,
         process_id: Process.pid,
-        process_started_at: File::Stat.new(Process.argv0).birthtime,
         path_to_file: filename,
-        commandline: commandline
+        commandline: input
       }
 
       Sensor::Logger.activity(hsh)

@@ -1,75 +1,65 @@
 require "spec_helper"
 
 RSpec.describe Sensor::ProcessSelector do
-  let(:selector) { described_class.new(filename: "foo.rb", options:  options) }
+  let(:selector) { described_class.new(input: input) }
+  let(:filename) { "foo.txt" }
+  #let(:filename) { File.expand_path("#{File.dirname(__FILE__)}../foo.txt") }
 
   describe ".run" do
-    context "when the options are to write" do
-      let(:options) { { write: true, content: "puts 'Hello Friends'" } }
+    context "when the action is to write" do
+      let(:input) { { filename: filename, write: true, content: "puts 'Hello Friends'" } }
 
-      it "selects the write process" do
-        allow(selector).to receive(:write_to_file)
-        selector.run
-        expect(selector).to have_received(:write_to_file)
-      end
+      it "logs and selects the write process" do
+        expect(selector).to receive(:fork).and_yield do |block_context|
+          expect(block_context).to receive(:log_activity)
+          expect(block_context).to receive(:send).with("write_to_file")
+        end
 
-      it "logs the process" do
-        expect(Sensor::Logger).to receive(:activity)
         selector.run
       end
     end
 
-    context "when the options are to update" do
-      let(:options) { { update: true, content: "puts 'Hola Amigos'" } }
+    context "when the action is to update" do
+      let(:input) { { filename: filename, update: true, content: "puts 'Hola Amigos'" } }
 
-      it "selects the update process" do
-        allow(selector).to receive(:update_file)
-        selector.run
-        expect(selector).to have_received(:update_file)
-      end 
+      it "logs and selects the update process" do
+        expect(selector).to receive(:fork).and_yield do |block_context|
+          expect(block_context).to receive(:log_activity)
+          expect(block_context).to receive(:send).with("update_file")
+        end
 
-      it "logs the process" do
-        expect(Sensor::Logger).to receive(:activity)
         selector.run
       end
     end
 
-    context "when the options are to delete" do
-      let(:options) { { delete: true } }
+    context "when the action is to delete" do
+      let(:input) { { filename: filename, delete: true } }
 
-      it "selects the delete process" do
-        allow(selector).to receive(:delete_file)
-        selector.run
-        expect(selector).to have_received(:delete_file)
-      end 
+      it "logs and selects the delete process" do
+        expect(selector).to receive(:fork).and_yield do |block_context|
+          expect(block_context).to receive(:log_activity)
+          expect(block_context).to receive(:send).with("delete_file")
+        end
 
-      it "logs the process" do
-        expect(Sensor::Logger).to receive(:activity)
         selector.run
       end
     end
 
-    context "when no options are provided" do
-      let(:options) { {} }
+    context "when no input are provided" do
+      let(:input) { {} }
 
-      before do
-        allow(IO).to receive_message_chain(:popen, :each_line).and_return(true)
-      end
+      it "logs and selects the execute process" do
+        expect(selector).to receive(:fork).and_yield do |block_context|
+          expect(block_context).to receive(:log_activity)
+          expect(block_context).to receive(:send).with("execute_file")
+        end
 
-      it "selects the execute process" do
-        allow(selector).to receive(:execute_file)
-        selector.run
-        expect(selector).to have_received(:execute_file)
-      end 
-
-      it "logs the process" do
-        expect(Sensor::Logger).to receive(:activity)
         selector.run
       end
     end
 
     context "when the forward flag is set" do
-      let(:options) { { update: true, content: "puts 'Hola Amigos'", forward: true } }
+      let(:input) { { filename: filename, update: true, content: "puts 'Hola Amigos'", forward: true } }
 
       it "calls the HttpForwarder" do
         expect(Sensor::HttpForwarder).to receive(:new)
@@ -78,7 +68,7 @@ RSpec.describe Sensor::ProcessSelector do
     end
 
     context "when the forward flag is not set" do
-      let(:options) { { update: true, content: "puts 'Hola Amigos'" } }
+      let(:input) { { filename: filename, update: true, content: "puts 'Hola Amigos'" } }
 
       it "doesn't call the HttpForwarder" do
         expect(Sensor::HttpForwarder).to_not receive(:new)

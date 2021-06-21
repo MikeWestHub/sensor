@@ -18,11 +18,11 @@ module Sensor
       info = file_info_json
       s = TCPSocket.new ADDRESS, PORT
 
-      s.write "POST / HTTP/1.0\r\n"
+      s.write "POST / HTTP/1.1\r\n"
       s.write "Host: #{ADDRESS}\r\n"
       s.write "Content-Type: application/json\r\n"
-      s.write "Content-Length: #{info.bytesize}\r\n"
-      s.write "#{info}\r\n\r\n"
+      s.write "Content-Length: #{info.bytesize}\r\n\r\n"
+      s.write "#{info}\r\n"
 
       log_activity(info, s)
 
