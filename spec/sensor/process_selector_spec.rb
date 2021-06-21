@@ -3,7 +3,6 @@ require "spec_helper"
 RSpec.describe Sensor::ProcessSelector do
   let(:selector) { described_class.new(input: input) }
   let(:filename) { "foo.txt" }
-  #let(:filename) { File.expand_path("#{File.dirname(__FILE__)}../foo.txt") }
 
   describe ".run" do
     context "when the action is to write" do
@@ -60,10 +59,12 @@ RSpec.describe Sensor::ProcessSelector do
 
     context "when the forward flag is set" do
       let(:input) { { filename: filename, update: true, content: "puts 'Hola Amigos'", forward: true } }
+      let(:socket) { double('TCPSocket', write: true, close: true) }
 
       it "calls the HttpForwarder" do
-        expect(Sensor::HttpForwarder).to receive(:new)
+        allow(Sensor::HttpForwarder).to receive(:new).and_call_original
         selector.run
+        expect(Sensor::HttpForwarder).to have_received(:new).with(file_info: input)
       end
     end
 

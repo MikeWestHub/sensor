@@ -1,8 +1,11 @@
 # Entry point for the Sensor framework
 # Currently CLI is the only supported source for ingestion
+require_relative './log_formatting'
 
 module Sensor
   class Ingestor
+    include LogFormatting
+
     attr_reader :input
 
     def initialize(input:)
@@ -17,9 +20,9 @@ module Sensor
       log_activity
       validate_input
       process_input
-    rescue ValidationError => e
+    rescue ValidationError, NetworkingError => e
       log_error(e)
-      puts "Validation Error: #{e.message}"
+      puts "Your request returned #{e.class}: #{e.message}"
     end
 
     private
@@ -33,13 +36,15 @@ module Sensor
     end
 
     def log_activity
+      pid = Process.pid
+
       hsh = {
         action: :command_line_request,
-        process_started_at: File::Stat.new(Process.argv0).birthtime,
-        username: `who -m | awk '{print $1}'`.strip,
+        process_started_at: process_start_for(pid),
+        username: username_for(pid),
         user_id: Process.uid,
         process_name: Process.argv0,
-        process_id: Process.pid,
+        process_id: pid,
         commandline: input
       }
 

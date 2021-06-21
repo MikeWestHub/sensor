@@ -2,9 +2,12 @@
 # host and port
 require "socket"
 require "json"
+require_relative './log_formatting'
 
 module Sensor
   class HttpForwarder
+    include LogFormatting
+
     ADDRESS = ENV.fetch('HOST', 'localhost')
     PORT = ENV.fetch('PORT', 2000)
 
@@ -27,6 +30,8 @@ module Sensor
       log_activity(info, s)
 
       s.close
+    rescue Errno::ECONNREFUSED, Errno::EADDRNOTAVAIL
+      puts "Connection refused. Make sure a server is running at your assign ADDRESS and PORT."
     end
 
     def file_info_json
@@ -45,9 +50,12 @@ module Sensor
     private
 
     def log_activity(info, socket)
+      pid = Process.pid
+
       hsh = {
         action: :network_request,
-        started_at: File::Stat.new(Process.argv0).birthtime,
+        process_started_at: process_start_for(pid),
+        username: username_for(pid),
         user_id: Process.uid,
         process_id: Process.pid,
         process_name: Process.argv0,

@@ -19,6 +19,11 @@ RSpec.describe Sensor::HttpForwarder do
       expect(forwarder).to receive(:log_activity)
       forwarder.send_data
     end
+
+    it 'rescues connection refused errors' do
+      allow(TCPSocket).to receive(:new).and_raise(Errno::ECONNREFUSED)
+      expect{ forwarder.send_data }.to_not raise_error
+    end
   end
 
   describe '.file_info_json' do
