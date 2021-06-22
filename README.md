@@ -20,7 +20,7 @@ Run the following to make the `sensor` file executable:
 
 ## Usage
 
-The Sensor CLI expects the full path to a filename as the first argument. By default, the Sensor framework will attempt to execute the file if no flags are given.
+The Sensor CLI expects the full or relative path to a filename as the first argument. By default, the Sensor framework will attempt to execute the file if no flags are given.
 
 Example:
 
@@ -43,7 +43,7 @@ Descriptions for all available options can be printed by passing the `--help` fl
 The `--forward` flag can be passed with any arguments to send a JSON body containing information about the Sensor process to an address and port of your choosing. Sensor uses `localhost` and `2000`as the default `ADDRESS` and `PORT` respectively. To change the location of the server you would like to forward to, set the `ADDRESS` and `PORT` variables in your environment.
 
     $ export ADDRESS=example.com
-    $ epxport PORT=1234
+    $ export PORT=1234
 
 Example command line with `--forward`:
 ```bash
