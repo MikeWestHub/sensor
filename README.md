@@ -1,6 +1,6 @@
 # Sensor
 
-Sensor is a Command Line Interface that allows the manipulation of files within a given file system. Primary operations are writing, updating, deleting and executing. This Gem is currently built with running on Mac and Linux systems in mind. 
+Sensor is a Command Line Interface that allows the manipulation of files within a given file system. Primary operations are writing, updating, deleting and executing. This Gem is currently built with running on Mac and Linux systems in mind.
 
 Sensor also supports the forwarding of process execution information over HTTP to an address and port of your choice. 
 
