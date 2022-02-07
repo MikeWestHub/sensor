@@ -1,4 +1,4 @@
-# Sensor - Where noise gets made!!
+# Sensor
 
 Sensor is a Command Line Interface that allows the manipulation of files within a given file system. Primary operations are writing, updating, deleting and executing. This Gem is currently built with running on Mac and Linux systems in mind.
 
